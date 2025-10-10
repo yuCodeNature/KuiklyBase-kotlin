@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.konan.target
 
 enum class SanitizerKind {
     ADDRESS,
+    HWADDRESS,
     THREAD,
 }
 
@@ -23,4 +24,5 @@ val SanitizerKind?.targetSuffix: String
         null -> ""
         SanitizerKind.THREAD -> "_tsan"
         SanitizerKind.ADDRESS -> "_asan"
+        SanitizerKind.HWADDRESS -> "_hwasan"
     }

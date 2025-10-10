@@ -191,9 +191,9 @@ class OhosLinker(targetProperties: OhosConfigurables) : LinkerFlags(targetProper
     override fun filterStaticLibraries(binaries: List<String>) = binaries.filter { it.isUnixStaticLib }
 
     override fun LinkerArguments.finalLinkCommands(): List<Command> {
-        if (sanitizer != null && sanitizer !in listOf(SanitizerKind.ADDRESS)) {
+        if (sanitizer != null && sanitizer !in listOf(SanitizerKind.ADDRESS, SanitizerKind.HWADDRESS)) {
             require(false) {
-                "Only ADDRESS sanitizer is supported on OHOS, got: $sanitizer"
+                "Only ADDRESS or HWADDRESS sanitizer is supported on OHOS, got: $sanitizer"
             }
         }
 
@@ -238,6 +238,12 @@ class OhosLinker(targetProperties: OhosConfigurables) : LinkerFlags(targetProper
                 SanitizerKind.ADDRESS -> {
                     +"$targetLib/libclang_rt.asan.so"
                     +"$targetLib/libclang_rt.asan-preinit.a"
+                    +"$targetLib/libclang_rt.builtins.a"
+                    +"$targetLib/clang_rt.crtend.o"
+                }
+                SanitizerKind.HWADDRESS -> {
+                    +"$targetLib/libclang_rt.hwasan.so"
+                    +"$targetLib/libclang_rt.hwasan-preinit.a"
                     +"$targetLib/libclang_rt.builtins.a"
                     +"$targetLib/clang_rt.crtend.o"
                 }
@@ -363,6 +369,7 @@ class MacOSBasedLinker(targetProperties: AppleConfigurables)
             when (sanitizer) {
                 null -> {}
                 SanitizerKind.ADDRESS -> +provideCompilerRtLibrary("asan", isDynamic=true)!!
+                SanitizerKind.HWADDRESS -> +provideCompilerRtLibrary("hwasan", isDynamic=true)!!
                 SanitizerKind.THREAD -> +provideCompilerRtLibrary("tsan", isDynamic=true)!!
             }
         }
@@ -498,6 +505,11 @@ class GccBasedLinker(targetProperties: GccConfigurables)
                     +"-lrt"
                     +provideCompilerRtLibrary("asan")!!
                     +provideCompilerRtLibrary("asan_cxx")!!
+                }
+                SanitizerKind.HWADDRESS -> {
+                    +"-lrt"
+                    +provideCompilerRtLibrary("hwasan")!!
+                    +provideCompilerRtLibrary("hwasan_cxx")!!
                 }
                 SanitizerKind.THREAD -> {
                     +"-lrt"

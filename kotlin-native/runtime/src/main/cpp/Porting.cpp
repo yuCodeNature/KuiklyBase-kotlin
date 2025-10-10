@@ -71,6 +71,9 @@ void consoleWriteUtf8(const char* utf8, uint32_t sizeBytes) {
 // region Tencent Code
 #elif KONAN_OHOS
   OH_LOG_Print(LOG_APP, LOG_INFO, LOG_DOMAIN, "Konan_main", "%{public}s", utf8);
+//  char* p = new char[10];
+//  p[20] = 'A';  // 堆缓冲区溢出
+
 // endregion
 #else
   ::write(STDOUT_FILENO, utf8, sizeBytes);

@@ -343,6 +343,18 @@ class AddressSanitizerPipeline(config: LlvmPipelineConfig, logger: LoggingContex
     }
 }
 
+class HWAddressSanitizerPipeline(config: LlvmPipelineConfig, logger: LoggingContext? = null) :
+        LlvmOptimizationPipeline(config, logger) {
+    override val pipelineName = "New PM hwaddress sanitizer"
+    override val passes = listOf("hwasan")
+
+    override fun executeCustomPreprocessing(config: LlvmPipelineConfig, module: LLVMModuleRef) {
+        getFunctions(module)
+                .filter { LLVMIsDeclaration(it) == 0 }
+                .forEach { addLlvmFunctionEnumAttribute(it, LlvmFunctionAttribute.SanitizeHWAddress) }
+    }
+}
+
 internal fun RelocationModeFlags.currentRelocationMode(context: PhaseContext): RelocationModeFlags.Mode =
         when (determineLinkerOutput(context)) {
             LinkerOutputKind.DYNAMIC_LIBRARY -> dynamicLibraryRelocationMode

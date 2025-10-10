@@ -96,6 +96,11 @@ internal val AddressSanitizerPhase = optimizationPipelinePass(
         pipeline = ::AddressSanitizerPipeline
 )
 
+internal val HWAddressSanitizerPhase = optimizationPipelinePass(
+        name = "HWAddressSanitizerPhase",
+        pipeline = ::AddressSanitizerPipeline
+)
+
 internal val RemoveRedundantSafepointsPhase = createSimpleNamedCompilerPhase<BitcodePostProcessingContext, Unit>(
         name = "RemoveRedundantSafepoints",
         postactions = getDefaultLlvmModuleActions(),
@@ -150,6 +155,7 @@ internal fun <T : BitcodePostProcessingContext> PhaseEngine<T>.runBitcodePostPro
         when (context.config.sanitizer) {
             SanitizerKind.THREAD -> it.runPhase(ThreadSanitizerPhase, module)
             SanitizerKind.ADDRESS -> it.runPhase(AddressSanitizerPhase, module)
+            SanitizerKind.HWADDRESS -> it.runPhase(HWAddressSanitizerPhase, module)
             null -> {}
         }
     }
